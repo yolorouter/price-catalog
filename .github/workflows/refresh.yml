@@ -97,7 +97,13 @@ jobs:
           # as the value. "$(cat ...)" feeds the file contents. --remote writes
           # to the real Cloudflare KV; without it wrangler writes to a local
           # Miniflare that dies with the runner.
-          npx wrangler kv key put \
+          #
+          # wrangler is PINNED: 4.128 fails this exact write with
+          # "get namespace: 'namespace not found' [10013]" against this
+          # (2026-08-created) namespace while 4.86 succeeds — isolated to the
+          # version with the same token, machine, and namespace. Unpin only
+          # after re-verifying the write against the live namespace.
+          npx wrangler@4.86.0 kv key put \
             --namespace-id="$PRICE_CATALOG_KV_ID" \
             --remote \
             catalog.json "$(cat ./catalog.json)"
