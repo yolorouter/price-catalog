@@ -1,0 +1,13 @@
+{
+  "name": "price-catalog",
+  "private": true,
+  "type": "module",
+  "description": "Daily-refreshed chat-model price catalog for yolorouter (CNY per million tokens)",
+  "scripts": {
+    "refresh": "node scripts/refresh.mjs catalog.json",
+    "validate": "node scripts/validate.mjs catalog.json"
+  },
+  "dependencies": {
+    "playwright": "^1.40.0"
+  }
+}
