@@ -48,8 +48,12 @@ jobs:
       # Three providers (DeepSeek/Baichuan/Volcengine) render their prices
       # client-side, so the fetchers drive a headless browser. --with-deps
       # installs the OS libraries chromium needs on the ubuntu runner.
+      # playwright is pinned to the version verified against the live vendor
+      # pages — this job holds repo secrets, so an unpinned install would let
+      # a compromised npm release execute with them. Bump deliberately and
+      # re-verify the three headless fetchers afterwards.
       - name: Install playwright chromium
-        run: npm install playwright && npx playwright install --with-deps chromium
+        run: npm install playwright@1.62.1 && npx playwright install --with-deps chromium
 
       - name: Refresh prices
         run: node scripts/refresh.mjs catalog.json
