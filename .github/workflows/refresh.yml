@@ -114,8 +114,11 @@ jobs:
               echo "KV write succeeded on attempt $i"
               exit 0
             fi
-            echo "KV write attempt $i failed — retrying in 30s"
-            sleep 30
+            echo "KV write attempt $i failed"
+            if [ "$i" -lt 5 ]; then
+              echo "retrying in 30s"
+              sleep 30
+            fi
           done
           echo "KV write failed after 5 attempts"
           exit 1

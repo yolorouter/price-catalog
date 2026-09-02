@@ -38,8 +38,15 @@ function main() {
 
   if (typeof catalog.updated_at !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(catalog.updated_at)) {
     fail(violations, `updated_at must be YYYY-MM-DD, got ${JSON.stringify(catalog.updated_at)}`);
-  } else if (Number.isNaN(Date.parse(catalog.updated_at))) {
-    fail(violations, `updated_at is not a real date: ${catalog.updated_at}`);
+  } else {
+    // V8's Date.parse accepts impossible dates by rolling over (2026-02-30 →
+    // March), while the Go reader's time.Parse rejects them — round-trip the
+    // components so this gate rejects exactly what the consumer would.
+    const [y, mo, da] = catalog.updated_at.split("-").map(Number);
+    const dt = new Date(Date.UTC(y, mo - 1, da));
+    if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== da) {
+      fail(violations, `updated_at is not a real calendar date: ${catalog.updated_at}`);
+    }
   }
   if (catalog.currency !== "CNY") fail(violations, `currency must be "CNY", got ${JSON.stringify(catalog.currency)}`);
   if (catalog.unit !== "per_million_tokens") fail(violations, `unit must be "per_million_tokens", got ${JSON.stringify(catalog.unit)}`);
@@ -50,7 +57,23 @@ function main() {
   } else if (Object.keys(prices).length === 0) {
     fail(violations, "prices is empty — every host was dropped");
   } else {
+    // Two keys that normalize alike (scheme/port/case on hosts, case on model
+    // names) would make the Go reader's lookup depend on map iteration order —
+    // buildIndex rejects them, so this gate must too. JSON parsing already
+    // dedupes identical raw keys; this catches only distinct-raw collisions.
+    const seenHosts = new Map();
     for (const [host, models] of Object.entries(prices)) {
+      const normHost = host
+        .replace(/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//, "")
+        .split("/")[0]
+        .replace(/:\d+$/, "")
+        .toLowerCase();
+      const priorHost = seenHosts.get(normHost);
+      if (priorHost !== undefined && priorHost !== host) {
+        fail(violations, `two host keys normalize alike: ${JSON.stringify(priorHost)} and ${JSON.stringify(host)}`);
+      } else if (priorHost === undefined) {
+        seenHosts.set(normHost, host);
+      }
       if (!host.trim()) fail(violations, "empty host key");
       if (host.includes("://") || host.includes("/")) {
         fail(violations, `host key must be a bare host (no scheme/path), got ${JSON.stringify(host)}`);
@@ -60,8 +83,16 @@ function main() {
         continue;
       }
       if (Object.keys(models).length === 0) fail(violations, `${host}: no models`);
+      const seenModels = new Set();
       for (const [name, p] of Object.entries(models)) {
         const where = `${host}/${name}`;
+        const normModel = name.trim().toLowerCase();
+        if (!name.trim()) fail(violations, `${host}: empty model key`);
+        else if (seenModels.has(normModel)) {
+          fail(violations, `${host}: two model keys normalize alike to ${JSON.stringify(normModel)}`);
+        } else {
+          seenModels.add(normModel);
+        }
         if (!name.trim()) fail(violations, `${host}: empty model key`);
         if (typeof p !== "object" || p === null || Array.isArray(p)) {
           fail(violations, `${where}: price must be an object`);
@@ -86,8 +117,10 @@ function main() {
           fail(violations, `${where}: input and output both zero`);
         }
         for (const k of ["cache_write", "cache_read"]) {
+          // Absent ≡ null ≡ the Go reader's nil pointer — only reject values
+          // that are present and not a finite non-negative number.
           const v = p[k];
-          if (v !== null && (typeof v !== "number" || !Number.isFinite(v) || v < 0)) {
+          if (v != null && (typeof v !== "number" || !Number.isFinite(v) || v < 0)) {
             fail(violations, `${where}: ${k} must be null or a finite number >= 0, got ${JSON.stringify(v)}`);
           }
         }
