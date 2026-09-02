@@ -105,6 +105,9 @@ function main() {
           fail(violations, `${where}: camelCase cache key — the contract is cache_write/cache_read`);
         }
         for (const k of Object.keys(p)) {
+          // cacheWrite/cacheRead get their own dedicated message below; skip
+          // them here so one mistake isn't reported twice.
+          if (k === "cacheWrite" || k === "cacheRead") continue;
           if (!ALLOWED_SLOTS.has(k)) fail(violations, `${where}: unknown slot ${JSON.stringify(k)}`);
         }
         for (const k of ["input", "output"]) {

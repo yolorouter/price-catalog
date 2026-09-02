@@ -21,7 +21,7 @@ pass.
   "unit": "per_million_tokens",
   "prices": {
     "api.deepseek.com": {
-      "deepseek-v4-pro": {
+      "deepseek-v4-flash": {
         "input": 1.5,
         "output": 4.5,
         "cache_write": null,
@@ -88,6 +88,10 @@ status.
 
 ```bash
 npm install playwright && npx playwright install --with-deps chromium
+# refresh.mjs takes its argument as BOTH the merge base and the output file,
+# so always work on a copy — pointing it at a path that doesn't exist yet
+# fails immediately.
+cp catalog.json /tmp/cat.json
 node scripts/refresh.mjs /tmp/cat.json   # fetch + normalize + write
 node scripts/validate.mjs /tmp/cat.json  # contract check (also runs in CI)
 ```
