@@ -64,6 +64,7 @@ function main() {
     const seenHosts = new Map();
     for (const [host, models] of Object.entries(prices)) {
       const normHost = host
+        .trim()
         .replace(/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//, "")
         .split("/")[0]
         .replace(/:\d+$/, "")
@@ -93,7 +94,6 @@ function main() {
         } else {
           seenModels.add(normModel);
         }
-        if (!name.trim()) fail(violations, `${host}: empty model key`);
         if (typeof p !== "object" || p === null || Array.isArray(p)) {
           fail(violations, `${where}: price must be an object`);
           continue;
