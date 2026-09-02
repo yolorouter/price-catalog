@@ -98,12 +98,24 @@ jobs:
           # to the real Cloudflare KV; without it wrangler writes to a local
           # Miniflare that dies with the runner.
           #
-          # wrangler is PINNED: 4.128 fails this exact write with
-          # "get namespace: 'namespace not found' [10013]" against this
-          # (2026-08-created) namespace while 4.86 succeeds — isolated to the
-          # version with the same token, machine, and namespace. Unpin only
-          # after re-verifying the write against the live namespace.
-          npx wrangler@4.86.0 kv key put \
-            --namespace-id="$PRICE_CATALOG_KV_ID" \
-            --remote \
-            catalog.json "$(cat ./catalog.json)"
+          # The write hits an intermittent Cloudflare-side
+          # "get namespace: 'namespace not found' [10013]" on namespace-scoped
+          # endpoints: the namespace is healthy (the Worker serves from it
+          # daily) but some API nodes fail to resolve it — observed across
+          # tokens, wrangler versions, and origins, with retries landing on
+          # healthy nodes. Retries are load-bearing, not cosmetic.
+          # wrangler stays pinned to 4.86.0, the version the previous CI used
+          # daily; unpin only together with re-verifying this write path.
+          for i in 1 2 3 4 5; do
+            if npx wrangler@4.86.0 kv key put \
+              --namespace-id="$PRICE_CATALOG_KV_ID" \
+              --remote \
+              catalog.json "$(cat ./catalog.json)"; then
+              echo "KV write succeeded on attempt $i"
+              exit 0
+            fi
+            echo "KV write attempt $i failed — retrying in 30s"
+            sleep 30
+          done
+          echo "KV write failed after 5 attempts"
+          exit 1
