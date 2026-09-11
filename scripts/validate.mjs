@@ -36,6 +36,23 @@ function main() {
     process.exit(1);
   }
 
+  // The audio section is optional on old catalogs but must hold the Go
+  // reader's shape when present: the character-unit header plus bare-host
+  // keys mapping model ids to one positive CNY figure.
+  if (catalog.audio !== undefined) {
+    const a = catalog.audio;
+    if (a.unit !== "per_million_characters") fail(violations, `audio.unit must be per_million_characters, got ${JSON.stringify(a.unit)}`);
+    if (!a.prices || typeof a.prices !== "object") fail(violations, "audio.prices must be an object of host -> model -> figure");
+    else for (const [host, models] of Object.entries(a.prices)) {
+      if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(host)) fail(violations, `audio host must be a bare host, got ${host}`);
+      for (const [model, figure] of Object.entries(models)) {
+        if (typeof figure !== "number" || !Number.isFinite(figure) || figure <= 0) {
+          fail(violations, `audio figure for ${host}/${model} must be a positive number, got ${JSON.stringify(figure)}`);
+        }
+      }
+    }
+  }
+
   if (typeof catalog.updated_at !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(catalog.updated_at)) {
     fail(violations, `updated_at must be YYYY-MM-DD, got ${JSON.stringify(catalog.updated_at)}`);
   } else {

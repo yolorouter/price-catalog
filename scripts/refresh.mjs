@@ -167,6 +167,18 @@ async function main() {
     prices,
   };
 
+  // The audio section is hand-curated, not scraped: TTS per-million-character
+  // list prices change rarely and live on vendors' speech pricing sheets the
+  // chat fetchers never visit. It rides in audio.json beside the catalog and
+  // is merged verbatim on every write, so the distributed payload (and the
+  // consumers' seed refresh) always carries it without a manual carry-forward.
+  // Price changes are PRs against audio.json.
+  try {
+    catalog.audio = JSON.parse(readFileSync(new URL("../audio.json", import.meta.url), "utf8"));
+  } catch {
+    throw new Error("audio.json is missing or not valid JSON — the catalog must carry the audio section");
+  }
+
   // Contract self-check before writing: matches the Go reader's buildIndex
   // validation (currency/unit/date), so a bug here surfaces as a CI failure
   // rather than a runtime load error in every consumer.
