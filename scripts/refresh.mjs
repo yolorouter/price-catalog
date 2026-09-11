@@ -78,7 +78,12 @@ function isRedundantVariant(name) {
 
 function normalize(providerResult) {
   const out = {};
-  for (const [name, price] of Object.entries(providerResult.models)) {
+  for (const [rawName, price] of Object.entries(providerResult.models)) {
+    // Pricing pages occasionally footnote a repeated column ("model(2)") for
+    // a variant tier; the suffix is page chrome, not part of the model id.
+    // Strip it so the entry lands under its real name — a repeated column
+    // collapses onto the same key, last write wins.
+    const name = rawName.replace(/\(\d+\)$/, "");
     if (!looksLikeChatModel(name)) continue;
     if (isRedundantVariant(name)) continue;
     // A zero/negative price is a free-tier marker or a parse artifact, not a
