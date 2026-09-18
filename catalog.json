@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-17",
+  "updated_at": "2026-09-18",
   "currency": "CNY",
   "unit": "per_million_tokens",
   "prices": {
@@ -112,6 +112,12 @@
       }
     },
     "api.siliconflow.cn": {
+      "zai-org/GLM-5.2": {
+        "input": 6,
+        "output": 28,
+        "cache_write": null,
+        "cache_read": null
+      },
       "tencent/Hy4-preview": {
         "input": 6,
         "output": 18,
@@ -163,12 +169,6 @@
       "moonshotai/Kimi-K2.7-Code": {
         "input": 6.5,
         "output": 27,
-        "cache_write": null,
-        "cache_read": null
-      },
-      "zai-org/GLM-5.2": {
-        "input": 6,
-        "output": 28,
         "cache_write": null,
         "cache_read": null
       },
