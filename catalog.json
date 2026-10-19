@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-18",
+  "updated_at": "2026-10-19",
   "currency": "CNY",
   "unit": "per_million_tokens",
   "prices": {
@@ -318,49 +318,13 @@
       }
     },
     "api.minimaxi.com": {
+      "minimax-m3.1-flash": {
+        "input": 1,
+        "output": 4,
+        "cache_write": null,
+        "cache_read": null
+      },
       "minimax-m3": {
-        "input": 4.2,
-        "output": 16.8,
-        "cache_write": null,
-        "cache_read": null
-      },
-      "minimax-m2.7": {
-        "input": 2.1,
-        "output": 8.4,
-        "cache_write": null,
-        "cache_read": null
-      },
-      "minimax-m2.7-highspeed": {
-        "input": 4.2,
-        "output": 16.8,
-        "cache_write": null,
-        "cache_read": null
-      },
-      "minimax-m2.5": {
-        "input": 2.1,
-        "output": 8.4,
-        "cache_write": null,
-        "cache_read": null
-      },
-      "minimax-m2.5-highspeed": {
-        "input": 4.2,
-        "output": 16.8,
-        "cache_write": null,
-        "cache_read": null
-      },
-      "minimax-m2.1": {
-        "input": 2.1,
-        "output": 8.4,
-        "cache_write": null,
-        "cache_read": null
-      },
-      "minimax-m2.1-highspeed": {
-        "input": 4.2,
-        "output": 16.8,
-        "cache_write": null,
-        "cache_read": null
-      },
-      "minimax-m2": {
         "input": 2.1,
         "output": 8.4,
         "cache_write": null,
