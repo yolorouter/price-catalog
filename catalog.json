@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-22",
+  "updated_at": "2026-10-23",
   "currency": "CNY",
   "unit": "per_million_tokens",
   "prices": {
@@ -327,6 +327,12 @@
       "minimax-m3": {
         "input": 4.2,
         "output": 16.8,
+        "cache_write": null,
+        "cache_read": null
+      },
+      "minimax-h3-regeneration": {
+        "input": 768,
+        "output": 0.3,
         "cache_write": null,
         "cache_read": null
       },
